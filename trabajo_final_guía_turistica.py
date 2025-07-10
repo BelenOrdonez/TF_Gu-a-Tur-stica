@@ -57,5 +57,3 @@ try:
         st.markdown(f"{i}. {lugar}")
 
 
-    except KeyError as e:
-        st.error(f"❌ Falta información en el Excel: {e}")
