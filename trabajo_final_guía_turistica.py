@@ -49,6 +49,6 @@ try:
     st.subheader("🌟 Top 3 lugares para visitar")
     st.write(top3)  # ← AQUÍ es donde solo muestra el texto crudo
 
-    except KeyError as e:
-        st.error(f"❌ Falta información en el Excel: {e}")
+except KeyError as e:
+    st.error(f"❌ Falta información en el Excel: {e}")
 
