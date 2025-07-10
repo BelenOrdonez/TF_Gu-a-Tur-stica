@@ -35,7 +35,7 @@ if seleccion:
     st.header(f"📍 {seleccion}")
     st.image(imagen_url, caption=f"Mapa de {seleccion}", use_container_width=True)
 
-   try:
+try:
     descripcion = df.at["descripcion", clave]
     tips = df.at["tips", clave]
     top3_crudo = df.at["top 3 lugares para visitar", clave]
