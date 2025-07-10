@@ -6,7 +6,7 @@ import urllib.parse
 st.set_page_config(page_title="Guía Turística del Perú", layout="centered")
 st.title("🇵🇪 Guía Turística del Perú")
 
-# 📄 Cargar Excel localmente (ya que las imágenes vienen de GitHub)
+
 EXCEL_PATH = "base de datos guia turistica.xlsx"
 df = pd.read_excel(EXCEL_PATH, index_col=0)
 df.index = [unidecode(str(idx).strip().lower()) for idx in df.index]
@@ -23,11 +23,14 @@ mapeo_departamentos = dict(zip(departamento_normalizados, departamentos))
 # Selección
 seleccion = st.selectbox("🔍 Elige un departamento para explorar:", departamentos)
 
+
+# Construye el nombre del archivo y la URL de GitHub
+
 if seleccion:
     clave = unidecode(seleccion.lower().strip())
     nombre_archivo = f"mapa {clave}.png"
-    nombre_archivo = urllib.parse.quote(nombre_archivo)  # para manejar espacios y tildes
-    imagen_url = f"{BASE_GITHUB_URL} {nombre_archivo}"
+    nombre_archivo_url = urllib.parse.quote(nombre_archivo)  # codifica espacios y tildes
+    imagen_url = f"https://raw.githubusercontent.com/BelenOrdonez/TF_Gu-a-Tur-stica/main/mapas/{nombre_archivo_url}"
 
     st.header(f"📍 {seleccion}")
     st.image(imagen_url, caption=f"Mapa de {seleccion}", use_container_width=True)
