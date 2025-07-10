@@ -35,25 +35,27 @@ if seleccion:
     st.header(f"📍 {seleccion}")
     st.image(imagen_url, caption=f"Mapa de {seleccion}", use_container_width=True)
 
-    try:
-        descripcion = df.at["descripcion", clave]
-        tips = df.at["tips", clave]
-        top3 = df.at["top 3 lugares para visitar", clave]
+   try:
+    descripcion = df.at["descripcion", clave]
+    tips = df.at["tips", clave]
+    top3_crudo = df.at["top 3 lugares para visitar", clave]
 
-        st.subheader("📝 Descripción")
-        st.write(descripcion)
+    st.subheader("📝 Descripción")
+    st.write(descripcion)
 
-        st.subheader("💡 Tips")
-        st.write(tips)
+    st.subheader("💡 Tips")
+    st.write(tips)
 
-        st.subheader("🌟 Top 3 lugares para visitar")
-        # Procesar 'top 3 lugares para visitar' como lista separada por números
-         top3_crudo = df.at["top 3 lugares para visitar", clave]
+    st.subheader("🌟 Top 3 lugares para visitar")
 
-# Separar usando los números como divisores (1., 2., 3.)
-          import re
-          lugares = re.split(r"\s*\d+\.\s*", top3_crudo)
-          lugares = [l.strip() for l in lugares if l.strip()]  # eliminar vacíos
+  
+    import re
+    lugares = re.split(r"\s*\d+\.\s*", top3_crudo)
+    lugares = [l.strip() for l in lugares if l.strip()]  # eliminar vacíos
+
+    for i, lugar in enumerate(lugares, start=1):
+        st.markdown(f"{i}. {lugar}")
+
 
 st.subheader("🌟 Top 3 lugares para visitar")
 for lugar in lugares:
