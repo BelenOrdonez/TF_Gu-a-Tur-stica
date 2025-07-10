@@ -13,7 +13,8 @@ st.title("🇵🇪 Guía Turística del Perú")
 
 # Enlaces de los archivos en GitHub
 EXCEL_URL = "https://raw.githubusercontent.com/BelenOrdonez/TF_Gu-a-Tur-stica/main/base%20de%20datos%20guia%20turistica.xlsx"
-ZIP_URL = "https://raw.githubusercontent.com/BelenOrdonez/TF_Gu-a-Tur-stica/main/mapas%20zip/mapas_departamentos.zip"
+ZIP_URL = "ZIP_URL = "https://github.com/BelenOrdonez/TF_Gu-a-Tur-stica/raw/main/mapas%20zip/mapas_departamentos.zip"
+
 
 # Crear carpeta temporal para mapas
 MAPA_DIR = "mapas_departamentos"
