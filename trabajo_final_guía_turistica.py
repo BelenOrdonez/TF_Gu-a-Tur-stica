@@ -57,7 +57,7 @@ try:
         st.markdown(f"{i}. {lugar}")
 
 
-st.subheader("🌟 Top 3 lugares para visitar")
+
 for lugar in lugares:
     st.markdown(f"- {lugar}")
 
