@@ -1,76 +1,63 @@
 # -*- coding: utf-8 -*-
-
-# Instalar librerías necesarias
-pip install streamlit openpyxl unidecode
-
-# Importar librerías
-from google.colab import files
 import pandas as pd
 import streamlit as st
-from IPython.display import display, Image
 from unidecode import unidecode
 import zipfile
 import os
 
+st.set_page_config(page_title="Guía Turística del Perú", layout="centered")
+
+st.title("🇵🇪 Guía Turística del Perú")
+st.markdown("Sube tu archivo Excel y el ZIP con los mapas para comenzar.")
+
 # Subir archivos
-print("🔼 Sube el archivo Excel y el ZIP con los mapas (ambos desde tu computadora)")
-uploaded = files.upload()
+excel_file = st.file_uploader("📄 Sube tu archivo Excel", type=["xlsx"])
+zip_file = st.file_uploader("🗺️ Sube tu archivo ZIP con mapas (.png)", type=["zip"])
 
-#Extraer ZIP con mapas
-for filename in uploaded.keys():
-    if filename.endswith(".zip"):
-        with zipfile.ZipFile(filename, 'r') as zip_ref:
-            zip_ref.extractall("mapas_departamentos")
-        print(" Mapas extraídos en la carpeta mapas_departamentos")
+if excel_file and zip_file:
+    # Extraer ZIP
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extractall("mapas_departamentos")
+    st.success("✅ Mapas extraídos correctamente.")
 
-# Cargar Excel (base de datos)
-excel_files = [f for f in uploaded if f.endswith(".xlsx")]
-if not excel_files:
-    raise ValueError("No se subió ningún archivo Excel.")
-excel_path = excel_files[0]
+    # Cargar Excel
+    df = pd.read_excel(excel_file, index_col=0)
+    df.index = [unidecode(str(idx).strip().lower()) for idx in df.index]
+    df.columns = [unidecode(str(col).strip().lower()) for col in df.columns]
 
-df = pd.read_excel(excel_path, index_col=0)
-df.index = [unidecode(str(idx).strip().lower()) for idx in df.index]
-df.columns = [unidecode(str(col).strip().lower()) for col in df.columns]
+    departamentos = df.columns.tolist()
+    departamento_normalizados = [unidecode(dep.lower().strip()) for dep in departamentos]
+    mapeo_departamentos = dict(zip(departamento_normalizados, departamentos))
 
-# Mostrar departamentos disponibles
-print("\n📌 Departamentos disponibles:")
-print(", ".join(df.columns))
+    # Selección de departamento
+    seleccion = st.selectbox("Selecciona un departamento para explorar:", departamentos)
 
-# Crear mapeo
-departamento_originales = df.columns.tolist()
-departamento_normalizados = [unidecode(dep.lower().strip()) for dep in departamento_originales]
-mapeo_departamentos = dict(zip(departamento_normalizados, departamento_originales))
+    if seleccion:
+        clave = unidecode(seleccion.lower().strip())
+        ruta_mapa = os.path.join("mapas_departamentos", f"mapa {clave}.png")
 
-# Preguntar al usuario qué departamento desea visitar
-while True:
-    departamento_usuario = input("\n🔍 ¿Qué departamento del Perú te gustaría visitar?\n").strip().lower()
-    departamento_usuario = unidecode(departamento_usuario)
+        st.header(f"📍 {seleccion}")
 
-    if departamento_usuario in mapeo_departamentos:
-        col_departamento = mapeo_departamentos[departamento_usuario]
-        nombre_mapa = f"mapa {departamento_usuario}.png"
-        ruta_mapa = os.path.join("mapas_departamentos", nombre_mapa)
-
-        # Mostrar mapa
         if os.path.exists(ruta_mapa):
-            print(f"\n🗺️ Mapa de {col_departamento.title()}:")
-            display(Image(filename=ruta_mapa))
+            st.image(ruta_mapa, caption=f"Mapa de {seleccion}", use_column_width=True)
         else:
-            print(f"⚠️ No se encontró el mapa: {ruta_mapa}")
+            st.warning("⚠️ Mapa no encontrado para este departamento.")
 
-        # Mostrar información
         try:
-            descripcion = df.at["descripcion", departamento_usuario]
-            tips = df.at["tips", departamento_usuario]
-            top3 = df.at["top 3 lugares para visitar", departamento_usuario]
+            descripcion = df.at["descripcion", clave]
+            tips = df.at["tips", clave]
+            top3 = df.at["top 3 lugares para visitar", clave]
 
-            print(f"\n📍 {col_departamento.title()}")
-            print(f"\n📝 Descripción:\n{descripcion}")
-            print(f"\n💡 Tips:\n{tips}")
-            print(f"\n🌟 Top 3 lugares para visitar:\n{top3}")
+            st.subheader("📝 Descripción")
+            st.write(descripcion)
+
+            st.subheader("💡 Tips")
+            st.write(tips)
+
+            st.subheader("🌟 Top 3 lugares para visitar")
+            st.write(top3)
         except KeyError as e:
-            print(f"❌ Falta en el Excel la fila: {e}")
-        break
-    else:
-        print("Ese departamento no está en la lista. Intenta nuevamente.")
+            st.error(f"❌ Falta información en el Excel: {e}")
+else:
+    st.info("⬆️ Esperando que subas los archivos.")
+
