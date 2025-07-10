@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Instalar librerías necesarias
-!pip install openpyxl unidecode
+pip install openpyxl unidecode
 
 # Importar librerías
 from google.colab import files
