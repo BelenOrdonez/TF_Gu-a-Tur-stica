@@ -38,7 +38,7 @@ if seleccion:
 try:
     descripcion = df.at["descripcion", clave]
     tips = df.at["tips", clave]
-    top3_crudo = df.at["top 3 lugares para visitar", clave]
+    top3 = df.at["top 3 lugares para visitar", clave]
 
     st.subheader("📝 Descripción")
     st.write(descripcion)
@@ -47,13 +47,8 @@ try:
     st.write(tips)
 
     st.subheader("🌟 Top 3 lugares para visitar")
+    st.write(top3)  # ← AQUÍ es donde solo muestra el texto crudo
 
-  
-    import re
-    lugares = re.split(r"\s*\d+\.\s*", top3_crudo)
-    lugares = [l.strip() for l in lugares if l.strip()]  # eliminar vacíos
-
-    for i, lugar in enumerate(lugares, start=1):
-        st.markdown(f"{i}. {lugar}")
-
+    except KeyError as e:
+        st.error(f"❌ Falta información en el Excel: {e}")
 
