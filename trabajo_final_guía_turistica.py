@@ -57,10 +57,5 @@ try:
         st.markdown(f"{i}. {lugar}")
 
 
-
-for lugar in lugares:
-    st.markdown(f"- {lugar}")
-
-        st.write(top3)
     except KeyError as e:
         st.error(f"❌ Falta información en el Excel: {e}")
