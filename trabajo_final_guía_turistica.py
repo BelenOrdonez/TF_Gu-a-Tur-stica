@@ -14,6 +14,7 @@ st.markdown("Sube tu archivo Excel y el ZIP con los mapas para comenzar.")
 excel_file = st.file_uploader("📄 Sube tu archivo Excel", type=["xlsx"])
 zip_file = st.file_uploader("🗺️ Sube tu archivo ZIP con mapas (.png)", type=["zip"])
 
+
 if excel_file and zip_file:
     # Extraer ZIP
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
