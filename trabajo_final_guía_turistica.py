@@ -1,63 +1,81 @@
 # -*- coding: utf-8 -*-
-import pandas as pd
 import streamlit as st
+import pandas as pd
 from unidecode import unidecode
 import zipfile
 import os
+import requests
+from io import BytesIO
 
+# Configuración
 st.set_page_config(page_title="Guía Turística del Perú", layout="centered")
-
 st.title("🇵🇪 Guía Turística del Perú")
-st.markdown("Sube tu archivo Excel y el ZIP con los mapas para comenzar.")
 
-# Subir archivos
-excel_file = st.file_uploader("📄 Sube tu archivo Excel", type=["xlsx"])
-zip_file = st.file_uploader("🗺️ Sube tu archivo ZIP con mapas (.png)", type=["zip"])
+# Enlaces de los archivos en GitHub
+EXCEL_URL = "https://raw.githubusercontent.com/BelenOrdonez/TF_Gu-a-Tur-stica/main/base%20de%20datos%20guia%20turistica.xlsx"
+ZIP_URL = "https://raw.githubusercontent.com/BelenOrdonez/TF_Gu-a-Tur-stica/main/mapas%20zip/mapas_departamentos.zip"
 
-if excel_file and zip_file:
-    # Extraer ZIP
-    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-        zip_ref.extractall("mapas_departamentos")
-    st.success("✅ Mapas extraídos correctamente.")
+# Crear carpeta temporal para mapas
+MAPA_DIR = "mapas_departamentos"
+if not os.path.exists(MAPA_DIR):
+    os.makedirs(MAPA_DIR)
 
-    # Cargar Excel
-    df = pd.read_excel(excel_file, index_col=0)
+# Descargar y cargar Excel
+@st.cache_data
+def cargar_excel(url):
+    response = requests.get(url)
+    df = pd.read_excel(BytesIO(response.content), index_col=0)
     df.index = [unidecode(str(idx).strip().lower()) for idx in df.index]
     df.columns = [unidecode(str(col).strip().lower()) for col in df.columns]
+    return df
 
-    departamentos = df.columns.tolist()
-    departamento_normalizados = [unidecode(dep.lower().strip()) for dep in departamentos]
-    mapeo_departamentos = dict(zip(departamento_normalizados, departamentos))
+# Descargar y extraer ZIP
+@st.cache_resource
+def extraer_zip(url, carpeta_destino):
+    response = requests.get(url)
+    with zipfile.ZipFile(BytesIO(response.content)) as zip_ref:
+        zip_ref.extractall(carpeta_destino)
 
-    # Selección de departamento
-    seleccion = st.selectbox("Selecciona un departamento para explorar:", departamentos)
+# Cargar archivos
+with st.spinner("📥 Cargando archivos desde GitHub..."):
+    df = cargar_excel(EXCEL_URL)
+    extraer_zip(ZIP_URL, MAPA_DIR)
 
-    if seleccion:
-        clave = unidecode(seleccion.lower().strip())
-        ruta_mapa = os.path.join("mapas_departamentos", f"mapa {clave}.png")
+st.success("✅ Archivos cargados exitosamente desde GitHub.")
 
-        st.header(f"📍 {seleccion}")
+# Crear lista de departamentos
+departamentos = df.columns.tolist()
+departamento_normalizados = [unidecode(dep.lower().strip()) for dep in departamentos]
+mapeo_departamentos = dict(zip(departamento_normalizados, departamentos))
 
-        if os.path.exists(ruta_mapa):
-            st.image(ruta_mapa, caption=f"Mapa de {seleccion}", use_column_width=True)
-        else:
-            st.warning("⚠️ Mapa no encontrado para este departamento.")
+# Selección de departamento
+seleccion = st.selectbox("🔍 Elige un departamento para explorar:", departamentos)
 
-        try:
-            descripcion = df.at["descripcion", clave]
-            tips = df.at["tips", clave]
-            top3 = df.at["top 3 lugares para visitar", clave]
+if seleccion:
+    clave = unidecode(seleccion.lower().strip())
+    ruta_mapa = os.path.join(MAPA_DIR, f"mapa {clave}.png")
 
-            st.subheader("📝 Descripción")
-            st.write(descripcion)
+    st.header(f"📍 {seleccion}")
 
-            st.subheader("💡 Tips")
-            st.write(tips)
+    if os.path.exists(ruta_mapa):
+        st.image(ruta_mapa, caption=f"Mapa de {seleccion}", use_column_width=True)
+    else:
+        st.warning("⚠️ Mapa no encontrado para este departamento.")
 
-            st.subheader("🌟 Top 3 lugares para visitar")
-            st.write(top3)
-        except KeyError as e:
-            st.error(f"❌ Falta información en el Excel: {e}")
-else:
-    st.info("⬆️ Esperando que subas los archivos.")
+    try:
+        descripcion = df.at["descripcion", clave]
+        tips = df.at["tips", clave]
+        top3 = df.at["top 3 lugares para visitar", clave]
+
+        st.subheader("📝 Descripción")
+        st.write(descripcion)
+
+        st.subheader("💡 Tips")
+        st.write(tips)
+
+        st.subheader("🌟 Top 3 lugares para visitar")
+        st.write(top3)
+    except KeyError as e:
+        st.error(f"❌ Faltan datos en el Excel: {e}")
+
 
