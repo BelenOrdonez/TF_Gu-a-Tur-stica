@@ -27,7 +27,7 @@ if seleccion:
     clave = unidecode(seleccion.lower().strip())
     nombre_archivo = f"mapa {clave}.png"
     nombre_archivo = urllib.parse.quote(nombre_archivo)  # para manejar espacios y tildes
-    imagen_url = f"{BASE_GITHUB_URL}{nombre_archivo}"
+    imagen_url = f"{BASE_GITHUB_URL} {nombre_archivo}"
 
     st.header(f"📍 {seleccion}")
     st.image(imagen_url, caption=f"Mapa de {seleccion}", use_container_width=True)
