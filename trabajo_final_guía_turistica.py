@@ -47,6 +47,18 @@ if seleccion:
         st.write(tips)
 
         st.subheader("🌟 Top 3 lugares para visitar")
+        # Procesar 'top 3 lugares para visitar' como lista separada por números
+         top3_crudo = df.at["top 3 lugares para visitar", clave]
+
+# Separar usando los números como divisores (1., 2., 3.)
+          import re
+          lugares = re.split(r"\s*\d+\.\s*", top3_crudo)
+          lugares = [l.strip() for l in lugares if l.strip()]  # eliminar vacíos
+
+st.subheader("🌟 Top 3 lugares para visitar")
+for lugar in lugares:
+    st.markdown(f"- {lugar}")
+
         st.write(top3)
     except KeyError as e:
         st.error(f"❌ Falta información en el Excel: {e}")
